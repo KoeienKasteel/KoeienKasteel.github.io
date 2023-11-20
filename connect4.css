@@ -21,6 +21,13 @@
   padding-top:0px;
 }
 
+.fieldhuge{
+  height: 180px;
+  width: 200px;
+  font-size: 120px;
+  padding-bottom: 30px;
+}
+
 .fieldlarge{
   height: 105px;
   width: 125px;
@@ -47,6 +54,13 @@
   width: 45px;
   font-size: 35px;
   padding-bottom: 10px;
+}
+
+.fieldmicro{
+  height: 35px;
+  width: 35px;
+  font-size: 25px;
+  padding-bottom: 5px;
 }
 
 .playdataright{
