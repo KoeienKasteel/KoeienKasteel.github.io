@@ -1,0 +1,87 @@
+#playfield
+{
+    display: inline-grid;
+    border: 0px;
+    border-color: black;
+    border-style: solid;
+    padding: 0px;
+    gap: 0px;
+}
+
+.playdata{
+  border-left: 1px;
+  border-bottom: 1px;
+  border-right: 0px;
+  border-top: 0px;
+  border-color: black;
+  border-style: solid;
+  margin-left: 0px;
+  margin-right: 0px;
+  user-select: none;
+  padding-top:0px;
+}
+
+.fieldlarge{
+  height: 105px;
+  width: 125px;
+  font-size: 90px;
+  padding-bottom: 20px;
+}
+
+.fieldmedium{
+  height: 70px;
+  width: 80px;
+  font-size: 55px;
+  padding-bottom: 10px;
+}
+
+.fieldsmall{
+  height: 65px;
+  width: 75px;
+  font-size: 55px;
+  padding-bottom: 10px;
+}
+
+.fieldtiny{
+  height: 45px;
+  width: 45px;
+  font-size: 35px;
+  padding-bottom: 10px;
+}
+
+.playdataright{
+  border-right: 1px;
+  border-color: black;
+  border-style: solid;
+}
+
+.playdatatop{
+  border-top: 1px;
+  border-color: black;
+  border-style: solid;
+}
+
+#inputstatus{
+  color: red;
+  height: 20px;
+  user-select: none;
+}
+
+#gametitle{
+  font-size: 24px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  user-select: none;
+}
+
+#result{
+  font-size: 24px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  user-select: none;
+}
+
+#updateplayfield,#restart{
+  user-select: none;
+}

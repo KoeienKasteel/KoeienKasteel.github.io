@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="connect4.css"></link>
+    <script src="connect4.js"></script>
+    <title>KoeienKasteelKaasKonijnen</title>
+  </head>
+  <body>
+      <div id="gametitle">Welkom bij KoeienKasteelKaasKonijnen</div> <!-- or whatever other name you come up with -->
+      <div name="entryfields">
+      <label for="columns">Columns:&nbsp</label>
+      <input type="number" id="columns" name="columns" min="3" max="99" value="7"/>&nbsp <!-- for less try out my tic-tac-toe, max only here to limit size -->
+      <label for="rows">Rows:&nbsp</label>
+      <input type="number" id="rows" name="rows" min="3" max="99" value="6"/>&nbsp
+      <label for="players">Players:&nbsp</label>
+      <input type="number" id="players" name="players" min="2" max="4" value="2"/>&nbsp <!-- sorry, no player vs computer yet -->
+      <label for="connectcount">Connect Count:&nbsp</label>
+      <input type="number" id="connectcount" name="connectcount" min="3" max="99" value="4"/>&nbsp <!-- number of connected tokens to win -->
+      <button id="updateplayfield">Let's do it!</button>
+      </div>
+      <div id="inputstatus"></div>
+      <div id="playfield"></div>
+      <div id="result"></div>
+      <div id="bottombuttonbar">
+        <button id="restart">Restart</button>
+      </div>
+    </body>
+    <script>connect4Main()</script>
+</html>
