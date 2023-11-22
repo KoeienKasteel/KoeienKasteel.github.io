@@ -1,2 +1,2 @@
-# KoeienKasteel.github.io
+# KoeienKasteel (KaasKonijnen)
 Alle koeien en kastelen op een rijtje
