@@ -1,9 +1,11 @@
 "use strict";
 
-let rows=6 // 6 for in original game
-let cols=7 // 5 for in original game
-let connectCount=4 // this is the number of connected fields you need to win
-let players=2
+// no default values, values in html are leading
+let rows
+let cols
+let connectCount // this is the number of connected fields you need to win
+let players
+let startPlayer // starting player, used to determine start player for next game
 
 // some constants to make calls to the gridwalker easier
 const gwDown=1
@@ -22,8 +24,7 @@ function connect4Main() {
   if (doDebug) {
     initTestData(playFieldData)
   }
-  moveDataToGrid(playField, playFieldData)
-  resizeGrid()
+  doUpdatePlayField(playField,true)
 }
 
 function moveDataToGrid(playField, playFieldData) {
@@ -40,12 +41,10 @@ function moveDataToGrid(playField, playFieldData) {
 }
 
 function displayStatus(message) {
-  console.log(message)
   document.getElementById('result').innerText = message
 }
 
 function displayInputStatus(message) {
-  console.log(message)
   document.getElementById('inputstatus').innerText = message
 }
 
@@ -85,6 +84,7 @@ function addEventListeners(playField, playFieldData) {
   element = document.getElementById('updateplayfield')
   element.addEventListener('click', updatePlayField, false)
   element.playFieldData=playFieldData
+  window.addEventListener('resize',(e) => onResizeWindow(e,playField),false)
 }
 
 function initData(playField) {
@@ -109,12 +109,10 @@ function initData(playField) {
       playField.append(element)
     }
     playFieldData.push(rowData)
-    console.log(playFieldData)
   }
   addEventListeners(playField, playFieldData)
-  // TBD: find a way to alternate between players as starting player (random?)
-  player = 0 // invalid value used to update status through nextPlayer
-  nextPlayer()
+  player = startPlayer = Math.floor(Math.random()*players)+1 // between 1 and 4, not zero based
+  updatePlayerUp()
 
   return playFieldData
 }
@@ -191,12 +189,17 @@ function hasWinner(playFieldData, rowStart, colStart) {
   return winner;
 }
 
+function updatePlayerUp()
+{
+  document.getElementById('result').innerText = 'Player ' + tokens[player-1] + ' up';
+}
+
 function nextPlayer() {
   player++
   if (player > players) {
     player = 1
   }
-  document.getElementById('result').innerText = 'Player ' + tokens[player-1] + ' up';
+  updatePlayerUp()
 }
 
 function getElementByRowCol(playField, row, col) {
@@ -293,8 +296,9 @@ function doRestart(e) {
       element.style.removeProperty('pointer-events')
     }
     moveDataToGrid(playField, playFieldData)
-    player = 0 // used to update status through nextPlayer
+    player = startPlayer // previous starter
     nextPlayer()
+    startPlayer = player // current starter
   }
 }
 
@@ -338,8 +342,8 @@ function checkValues(numRows, numColumns,numPlayers, numConnectCount) {
   if (numRows < 3 || numRows > 16) {
     displayInputStatus('Enter a number of rows between 3 and 16')
   }
-  else if (numColumns < 3 || numColumns > 16) { // max value is arbitrary, but you probably don't like it any larger
-    displayInputStatus('Enter a number of columns between 3 and 16')
+  else if (numColumns < 3 || numColumns > 32) { // max value is arbitrary, but you probably don't like it any larger
+    displayInputStatus('Enter a number of columns between 3 and 32')
   } else if (numPlayers < 2 || numPlayers > 4) { // this is actually limited by the number of symbols in the token array, though more than four doesn't make much sense
     displayInputStatus('Enter a number of players between 2 and 4')
   } else if (numConnectCount < 2 || numConnectCount > 6) { // this is the number of connected tokens for win (i.e, set it to 3 for connect3 or 5 for connect 5)
@@ -353,8 +357,13 @@ function checkValues(numRows, numColumns,numPlayers, numConnectCount) {
   return false
 }
 
-function updatePlayField(e) {
-  const playField = document.getElementById('playfield')
+function updatePlayField(e)
+{
+  const playField=document.getElementById('playfield')
+	doUpdatePlayField(playField,false)
+}
+
+function doUpdatePlayField(playField,silent) {
   const strColumns = document.getElementById('columns').value
   const strRows = document.getElementById('rows').value
   const strPlayers = document.getElementById('players').value
@@ -366,7 +375,7 @@ function updatePlayField(e) {
     const numConnectCount = parseInt(strConnectCount)
 
     if (checkValues(numRows, numColumns, numPlayers, numConnectCount)) {
-      if (confirm('Restart with updated parameters?')) {
+      if (silent || confirm('Restart with updated parameters?')) {
         // we're good to go!
         displayInputStatus('')
         cols = numColumns
@@ -375,46 +384,36 @@ function updatePlayField(e) {
         connectCount = numConnectCount
         const playFieldData = initData(playField)
         moveDataToGrid(playField, playFieldData)
-        resizeGrid()
+        // resizeGrid()
+        doResizeWindow(playField)
       }
     }
   }
 }
 
-function updateClassList(className) {
-  const elements = document.getElementsByClassName('playdata')
-  for (let element of elements) {
-    element.classList.remove('fieldhuge', 'fieldlarge', 'fieldmedium', 'fieldsmall', 'fieldtiny','fieldmicro')
-    element.classList.add(className)
-  }
+function onResizeWindow(e, playField)
+{
+  doResizeWindow(playField)
 }
 
-function resizeGrid() {
-  const fieldWidth = window.innerWidth / cols
-  const fieldHeight = (window.innerHeight - 140) / rows // 140 is about the size of status messages and buttons
-  let resizeClass
-
-  console.log('fieldWith=' + fieldWidth)
-  console.log('fieldHeight=' + fieldHeight)
-
-  if (fieldWidth > 200 && fieldHeight > 200) {
-    resizeClass = 'fieldhuge'
-  }
-  else if (fieldWidth > 100 && fieldHeight > 100) {
-    resizeClass = 'fieldmedium'
-  }
-  else if (fieldWidth > 80 && fieldHeight > 80) {
-    resizeClass = 'fieldsmall'
-  }
-  else if(fieldWidth>60 && fieldHeight>60)
-  {
-    resizeClass = 'fieldtiny'
-  }
-  else // if(fieldWidth>40 && fieldHeight>40)
-  {
-    resizeClass = 'fieldmicro'
-  }
-  console.log(resizeClass)
-  updateClassList(resizeClass)
-  console.log('--')
+function doResizeWindow(playField)
+{
+  let cellSize
+  const cellWidth=Math.round(window.innerWidth / cols)
+  let cellHeight=Math.round((window.innerHeight - 200) / rows) // 200 is about the size of status messages and buttons
+  const paddingBottom=Math.round(cellHeight/10) // slightly lift characters for better fit
+  cellHeight-=paddingBottom
+  if(cellHeight<cellWidth) // pick the smallest one for both height and width
+    cellSize=cellHeight
+  else
+    cellSize=cellWidth
+  const fontSize=Math.round(cellSize/1.4) // 1.4 look like a nice fit
+  const playData = playField.getElementsByClassName('playdata')
+  for (const element of playData) {
+    element.style.width = cellSize + 'px'
+    element.style.height = cellSize + 'px'
+    element.style.fontSize = fontSize + 'px'
+    element.style.paddingBottom= paddingBottom + 'px'
+  } 
 }
+  
