@@ -21,41 +21,6 @@
   padding-top:0px;
 }
 
-.fieldhuge{
-  height: 180px;
-  width: 200px;
-  font-size: 148px;
-  padding-bottom: 30px;
-}
-
-.fieldlarge{
-  height: 105px;
-  width: 125px;
-  font-size: 90px;
-  padding-bottom: 20px;
-}
-
-.fieldmedium{
-  height: 90px;
-  width: 100px;
-  font-size: 70px;
-  padding-bottom: 10px;
-}
-
-.fieldsmall{
-  height: 60px;
-  width: 70px;
-  font-size: 50px;
-  padding-bottom: 13px;
-}
-
-.fieldtiny{
-  height: 35px;
-  width: 40px;
-  font-size: 30px;
-  padding-bottom: 5px;
-}
-
 .playdataright{
   border-right: 1px;
   border-color: black;
