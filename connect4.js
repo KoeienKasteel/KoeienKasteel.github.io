@@ -18,13 +18,9 @@ let player
 
 function connect4Main() {
   const playField = document.getElementById('playfield')
-  const playFieldData = initData(playField)
-  const doDebug = false
+  const doDebug = true
 
-  if (doDebug) {
-    initTestData(playFieldData)
-  }
-  doUpdatePlayField(playField,true)
+  doUpdatePlayField(playField,true,doDebug)
 }
 
 function moveDataToGrid(playField, playFieldData) {
@@ -54,19 +50,12 @@ function clearStatus() {
   
 function initTestData(playFieldData) {
   // feel free to set up your own test data overhere
-  /*
-      playFieldData[rows-5]=[0, 0, 0, 0, 0, 0]
-      playFieldData[rows-4]=[0, 0, 1, 0, 0, 0]
-      playFieldData[rows-3]=[0, 0, 1, 2, 0, 0]
-      playFieldData[rows-2]=[0, 2, 2, 1, 2, 0]
-      playFieldData[rows-1]=[1, 2, 1, 2, 2, 1]
-  */
-  playFieldData[rows - 6] = [0, 0, 0, 0, 1, 0]
-  playFieldData[rows - 5] = [0, 0, 0, 0, 3, 0]
-  playFieldData[rows - 4] = [3, 4, 1, 3, 4, 3]
-  playFieldData[rows - 3] = [3, 4, 2, 1, 3, 4]
-  playFieldData[rows - 2] = [3, 2, 2, 1, 2, 4]
-  playFieldData[rows - 1] = [1, 2, 1, 2, 2, 1]
+  playFieldData[rows - 6] = [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1]
+  playFieldData[rows - 5] = [0, 0, 0, 4, 0, 0, 0, 3, 0, 0, 0, 4]
+  playFieldData[rows - 4] = [0, 0, 0, 3, 4, 1, 3, 4, 3, 3, 1, 1]
+  playFieldData[rows - 3] = [0, 4, 1, 3, 4, 2, 1, 3, 4, 2, 2, 1]
+  playFieldData[rows - 2] = [0, 3, 1, 3, 2, 2, 1, 2, 4, 2, 4, 4]
+  playFieldData[rows - 1] = [4, 1, 3, 1, 2, 1, 2, 2, 1, 2, 3, 3]
 }
 
 function addEventListeners(playField, playFieldData) {
@@ -360,10 +349,10 @@ function checkValues(numRows, numColumns,numPlayers, numConnectCount) {
 function updatePlayField(e)
 {
   const playField=document.getElementById('playfield')
-	doUpdatePlayField(playField,false)
+	doUpdatePlayField(playField,false,false)
 }
 
-function doUpdatePlayField(playField,silent) {
+function doUpdatePlayField(playField,silent,doDebug) {
   const strColumns = document.getElementById('columns').value
   const strRows = document.getElementById('rows').value
   const strPlayers = document.getElementById('players').value
@@ -383,6 +372,9 @@ function doUpdatePlayField(playField,silent) {
         players = numPlayers
         connectCount = numConnectCount
         const playFieldData = initData(playField)
+        if(doDebug){
+          initTestData(playFieldData)
+        }
         moveDataToGrid(playField, playFieldData)
         // resizeGrid()
         doResizeWindow(playField)
@@ -393,13 +385,15 @@ function doUpdatePlayField(playField,silent) {
 
 function onResizeWindow(e, playField)
 {
+  e
   doResizeWindow(playField)
 }
 
 function doResizeWindow(playField)
 {
   let cellSize
-  const cellWidth=Math.round(window.innerWidth / cols)
+  const border=1
+  const cellWidth=Math.round((window.innerWidth - 30) / cols)
   let cellHeight=Math.round((window.innerHeight - 200) / rows) // 200 is about the size of status messages and buttons
   const paddingBottom=Math.round(cellHeight/10) // slightly lift characters for better fit
   cellHeight-=paddingBottom
@@ -407,6 +401,9 @@ function doResizeWindow(playField)
     cellSize=cellHeight
   else
     cellSize=cellWidth
+  const playFieldContainer=document.getElementById('playfieldcontainer')
+  playFieldContainer.style.height=(cellSize+paddingBottom+2*border)*rows+'px'
+  playFieldContainer.style.width=(cellSize+2*border)*cols+'px'
   const fontSize=Math.round(cellSize/1.4) // 1.4 look like a nice fit
   const playData = playField.getElementsByClassName('playdata')
   for (const element of playData) {
@@ -416,4 +413,3 @@ function doResizeWindow(playField)
     element.style.paddingBottom= paddingBottom + 'px'
   } 
 }
-  

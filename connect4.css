@@ -1,14 +1,24 @@
-#playfield
-{
-    display: inline-grid;
-    border: 0px;
-    border-color: black;
-    border-style: solid;
-    padding: 0px;
-    gap: 0px;
+body {
+  background-color: blanchedalmond;
 }
 
-.playdata{
+#playfieldcontainer {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+#playfield {
+  display: inline-grid;
+  border: 0px;
+  border-color: black;
+  border-style: solid;
+  padding: 0px;
+  gap: 0px;
+  width: 100%;
+}
+
+.playdata {
   border-left: 1px;
   border-bottom: 1px;
   border-right: 0px;
@@ -18,42 +28,83 @@
   margin-left: 0px;
   margin-right: 0px;
   user-select: none;
-  padding-top:0px;
+  padding-top: 0px;
 }
 
-.playdataright{
+.playdataright {
   border-right: 1px;
   border-color: black;
   border-style: solid;
 }
 
-.playdatatop{
+.playdatatop {
   border-top: 1px;
   border-color: black;
   border-style: solid;
 }
 
-#inputstatus{
+#inputstatus {
   color: red;
   height: 20px;
   user-select: none;
 }
 
 #gametitle{
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 24pt;
   padding-bottom: 10px;
   user-select: none;
 }
 
-#result{
-  font-size: 24px;
+#topbar{
+  font-size: 18pt;
+  font-weight: bold;
+}
+
+button{
+  font-size: 18pt;
+  font-weight: bold;
+}
+
+#result {
+  font-size: 24pt;
   font-weight: bold;
   padding-bottom: 10px;
   padding-top: 10px;
   user-select: none;
 }
 
-#updateplayfield,#restart{
+#updateplayfield,
+#restart {
   user-select: none;
+}
+
+#entryfields label{
+
+}
+
+.entryfield {
+  display: inline-block;
+  width: 3em;
+  font-size: 16pt;
+}
+
+#topbarcontainer,
+#bottombarcontainer {
+  text-align: center;
+  width: auto;
+}
+
+#topbar,
+#bottombar {
+  margin-left: auto;
+  margin-right: auto;
+  display: inline;
+  display: inline-block;
+  width: auto;
+}
+
+.topfield,
+.bottomfield {
+  white-space: nowrap;
+  display: inline-block;
 }
