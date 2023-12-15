@@ -1,5 +1,18 @@
 body {
   background-color: blanchedalmond;
+  margin: 0px;
+}
+
+#bodycontainer {
+  position: relative;
+}
+
+#verticalcenter {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
 }
 
 #playfieldcontainer {
@@ -13,7 +26,8 @@ body {
   border: 0px;
   border-color: black;
   border-style: solid;
-  padding: 0px;
+  padding-left: 10px;
+  padding-right: 10px;
   gap: 0px;
   width: 100%;
 }
@@ -51,6 +65,7 @@ body {
 
 #gametitle{
   font-size: 24pt;
+  padding-top: 10px;
   padding-bottom: 10px;
   user-select: none;
 }
@@ -76,10 +91,6 @@ button{
 #updateplayfield,
 #restart {
   user-select: none;
-}
-
-#entryfields label{
-
 }
 
 .entryfield {

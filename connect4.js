@@ -393,14 +393,17 @@ function doResizeWindow(playField)
 {
   let cellSize
   const border=1
-  const cellWidth=Math.round((window.innerWidth - 30) / cols)
-  let cellHeight=Math.round((window.innerHeight - 200) / rows) // 200 is about the size of status messages and buttons
+  const cellWidth=Math.floor((window.innerWidth - cols*2 - 40) / cols)
+  let cellHeight=Math.floor((window.innerHeight - 200) / rows) // 200 is about the size of status messages and buttons
   const paddingBottom=Math.round(cellHeight/10) // slightly lift characters for better fit
   cellHeight-=paddingBottom
   if(cellHeight<cellWidth) // pick the smallest one for both height and width
     cellSize=cellHeight
   else
     cellSize=cellWidth
+  const bodyContainer=document.getElementById('bodycontainer')
+  bodyContainer.style.height=window.innerHeight + 'px'
+  bodyContainer.style.width=window.innerWidth + 'px'
   const playFieldContainer=document.getElementById('playfieldcontainer')
   playFieldContainer.style.height=(cellSize+paddingBottom+2*border)*rows+'px'
   playFieldContainer.style.width=(cellSize+2*border)*cols+'px'

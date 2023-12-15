@@ -10,35 +10,39 @@
 </head>
 
 <body>
-  <div id="topbarcontainer">
-    <div id="topbar">
-      <div id="gametitle" class="topfield">Welkom bij KoeienKasteel (KaasKonijnen)</div>
-      <div id="entryfields">
-        <label for="columns" class="topfield">Columns:&nbsp</label>
-        <input type="number" id="columns" name="columns" class="entryfield topfield" min="3" max="99" value="12" />&nbsp
-        <label for="rows" class="topfield">Rows:&nbsp</label>
-        <input type="number" id="rows" name="rows" class="entryfield topfield" min="3" max="99" value="8" />&nbsp
-        <label for="players" class="topfield">Players:&nbsp</label>
-        <input type="number" id="players" name="players" class="entryfield topfield" min="2" max="4" value="4" />&nbsp
-        <!-- sorry, no player vs computer yet -->
-        <label for="connectcount" class="topfield">Connect Count:&nbsp</label>
-        <input type="number" id="connectcount" name="connectcount" class="entryfield topfield" min="3" max="99"
-          value="4" />&nbsp
-        <!-- number of connected tokens to win -->
-        <button id="updateplayfield" class="topfield">Let's do it!</button>
+  <div id="bodycontainer">
+    <div id="verticalcenter">
+      <div id="topbarcontainer">
+        <div id="topbar">
+          <div id="gametitle" class="topfield">Welkom bij KoeienKasteel (KaasKonijnen)</div>
+          <div id="entryfields">
+            <label for="columns" class="topfield">Columns:&nbsp</label>
+            <input type="number" id="columns" name="columns" class="entryfield topfield" min="3" max="99"
+              value="12" />&nbsp
+            <label for="rows" class="topfield">Rows:&nbsp</label>
+            <input type="number" id="rows" name="rows" class="entryfield topfield" min="3" max="99" value="8" />&nbsp
+            <label for="players" class="topfield">Players:&nbsp</label>
+            <input type="number" id="players" name="players" class="entryfield topfield" min="2" max="4"
+              value="4" />&nbsp
+            <!-- sorry, no player vs computer yet -->
+            <label for="connectcount" class="topfield">Connect Count:&nbsp</label>
+            <input type="number" id="connectcount" name="connectcount" class="entryfield topfield" min="3" max="99"
+              value="4" />&nbsp
+            <!-- number of connected tokens to win -->
+            <button id="updateplayfield" class="topfield">Let's do it!</button>
+          </div>
+          <div id="inputstatus"></div>
+        </div>
       </div>
-      <div id="inputstatus"></div>  
-    </div>
-  </div>
-  <div>
-  </div>
-  <div id="playfieldcontainer">
-    <div id="playfield"></div>
-  </div>
-  <div id="bottombarcontainer">
-    <div id="bottombar">
-      <div id="result" class="bottomfield"></div>
-      <button id="restart" class="bottomfield">Restart</button>
+      <div id="playfieldcontainer">
+        <div id="playfield"></div>
+      </div>
+      <div id="bottombarcontainer">
+        <div id="bottombar">
+          <div id="result" class="bottomfield"></div>
+          <button id="restart" class="bottomfield">Restart</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
