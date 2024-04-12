@@ -1,0 +1,3 @@
+// ffu
+
+export default connectx
