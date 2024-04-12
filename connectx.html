@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="connect4.css">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />  <link rel="stylesheet" href="connectx.css">
   </link>
-  <script src="connect4.js"></script>
   <title>KoeienKasteelKaasKonijnen</title>
 </head>
 
@@ -24,12 +25,13 @@
             <label for="players" class="topfield">Players:&nbsp</label>
             <input type="number" id="players" name="players" class="entryfield topfield" min="2" max="4"
               value="4" />&nbsp
-            <!-- sorry, no player vs computer yet -->
+            <!-- sorry, no player vs computer (yet) -->
             <label for="connectcount" class="topfield">Connect Count:&nbsp</label>
             <input type="number" id="connectcount" name="connectcount" class="entryfield topfield" min="3" max="99"
               value="4" />&nbsp
             <!-- number of connected tokens to win -->
-            <button id="updateplayfield" class="topfield">Let's do it!</button>
+            <button id="updateplayfield" class="topfield">Local</button>
+            <button id="multiplayer" class="topfield">Multi</button>
           </div>
           <div id="inputstatus"></div>
         </div>
@@ -40,12 +42,13 @@
       <div id="bottombarcontainer">
         <div id="bottombar">
           <div id="result" class="bottomfield"></div>
-          <button id="restart" class="bottomfield">Restart</button>
         </div>
       </div>
     </div>
   </div>
 </body>
-<script>connect4Main()</script>
+
+<script type="module" src="index.js">
+</script>
 
 </html>

@@ -61,12 +61,13 @@ body {
   color: red;
   height: 20px;
   user-select: none;
+  font-size:16px
 }
 
 #gametitle{
   font-size: 24pt;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
   user-select: none;
 }
 
@@ -94,9 +95,9 @@ button{
 }
 
 .entryfield {
-  display: inline-block;
   width: 3em;
   font-size: 16pt;
+  margin-top: 4px;
 }
 
 #topbarcontainer,
