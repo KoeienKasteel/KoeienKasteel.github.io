@@ -33,8 +33,8 @@ body {
 }
 
 .playdata {
-  border-left: 1px;
-  border-bottom: 1px;
+  border-left: 3px;
+  border-bottom: 3px;
   border-right: 0px;
   border-top: 0px;
   border-color: black;
@@ -46,13 +46,13 @@ body {
 }
 
 .playdataright {
-  border-right: 1px;
+  border-right: 3px;
   border-color: black;
   border-style: solid;
 }
 
 .playdatatop {
-  border-top: 1px;
+  border-top: 3px;
   border-color: black;
   border-style: solid;
 }
@@ -71,7 +71,7 @@ body {
   user-select: none;
 }
 
-#topbar{
+#titlebar,#entrybar{
   font-size: 18pt;
   font-weight: bold;
 }
@@ -100,7 +100,8 @@ button{
   margin-top: 4px;
 }
 
-#topbarcontainer,
+#titlebar,
+#entrybar,
 #bottombarcontainer {
   text-align: center;
   width: auto;

@@ -37,7 +37,7 @@ class connectXSocket extends rtSocket {
     joinBoard(e) { // ,rows,cols,players,connectcount
         const data = JSON.parse(e.detail)
         // join any existing board waiting for one or more players or create a new one when none present
-        this.ws.send(JSON.stringify({ 'action': 'joinBoard', playerName: data.playerName }));
+        this.ws.send(JSON.stringify(Object.assign({ 'action': 'joinBoard'}, data)))
     }
 
     joinBoardById(e) {

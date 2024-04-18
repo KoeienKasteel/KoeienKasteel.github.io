@@ -109,7 +109,7 @@ class connectXApp {
   connectXMain() {
     const doDebug = true
     this.addEventListeners()
-    this.resetLocal(true, doDebug, false) // silent,doDebug,multiPlayer
+    this.resetField(true, doDebug, false) // silent,doDebug,multiPlayer
   }
 
   moveDataToGrid(playField) {
@@ -150,7 +150,7 @@ class connectXApp {
   addEventListeners() {
     let element
     element = document.getElementById('updateplayfield')
-    element.addEventListener('click', e => this.doResetLocal(e))
+    element.addEventListener('click', e => this.resetLocal(e))
     element = document.getElementById('multiplayer')
     element.addEventListener('click', e => this.startMultiPlayer(e))
     window.addEventListener('resize', e => this.onResizeWindow(e))
@@ -462,11 +462,11 @@ class connectXApp {
     return false
   }
 
-  doResetLocal(e) {
-    this.resetLocal(false, false, false) // silent, doDebug, multiPlayer
+  resetLocal(e) {
+    this.resetField(false, false, false) // silent, doDebug, multiPlayer
   }
 
-  resetLocal(silent, doDebug, isMultiPlayer) {
+  resetField(silent, doDebug, isMultiPlayer) {
     const playField = document.getElementById('playfield')
     const strColumns = document.getElementById('columns').value
     const strRows = document.getElementById('rows').value
@@ -492,7 +492,6 @@ class connectXApp {
             this.initTestData()
           }
           this.moveDataToGrid(playField)
-          // resizeGrid()
           this.doResizeWindow(playField)
         }
       }
@@ -506,21 +505,18 @@ class connectXApp {
   doResizeWindow() {
     let cellSize
     const playField = document.getElementById('playfield')
-    const border = 1
+    // const border = 2
     const cellWidth = Math.floor((window.innerWidth - this.cols * 2 - 40) / this.cols)
     let cellHeight = Math.floor((window.innerHeight - 200) / this.rows) // 200 is about the size of status messages and buttons
     const paddingBottom = Math.round(cellHeight / 10) // slightly lift characters for better fit
     cellHeight -= paddingBottom
-    if (cellHeight < cellWidth) // pick the smallest one for both height and width
-      cellSize = cellHeight
-    else
-      cellSize = cellWidth
+    cellSize=cellHeight < cellWidth ? cellHeight:cellWidth // pick the smallest one for both height and width
     const bodyContainer = document.getElementById('bodycontainer')
     bodyContainer.style.height = window.innerHeight + 'px'
     bodyContainer.style.width = window.innerWidth + 'px'
     const playFieldContainer = document.getElementById('playfieldcontainer')
-    playFieldContainer.style.height = (cellSize + paddingBottom + 2 * border) * rows + 'px'
-    playFieldContainer.style.width = (cellSize + 2 * border) * this.cols + 'px'
+    playFieldContainer.style.height = (cellSize + paddingBottom) * rows + 'px' //+ 2 * border
+    playFieldContainer.style.width = (cellSize) * this.cols + 'px' // + 2 * border
     const fontSize = Math.round(cellSize / 1.4) // 1.4 look like a nice fit
     const playData = playField.getElementsByClassName('playdata')
     for (const element of playData) {
@@ -594,11 +590,11 @@ class connectXApp {
     element.value = '7'
     element = document.getElementById('rows')
     element.value = '6'
-    element = document.getElementById('players')
-    element.value = '2'
+    // element = document.getElementById('players') // TBD: remove this code when allowing more than two network players
+    // element.value = '2'
     element = document.getElementById('connectcount')
     element.value = '4'
-    this.resetLocal(true, false, true) // (silent, doDebug,multiPlayer)
+    this.resetField(true, false, true) // (silent, doDebug,multiPlayer)
 
     // TBD: see if we can move this code to rtconnectxsocket instead
     if (this.webSocket === undefined) {
@@ -613,6 +609,8 @@ class connectXApp {
       // else
       //   try to sleep a bit, reconnect or just ignore when already connecting?
     }
+
+    this.displayStatus('Connecting to server...')
   }
 
   onSocketConnect() {
@@ -622,6 +620,7 @@ class connectXApp {
 
   onSocketError() {
     console.log('Socket error, cannot connect to server.')
+    this.displayStatus('Error connecting to server')
   }
 
   onSocketClose() {
@@ -635,7 +634,7 @@ class connectXApp {
 
   sendJoinBoard(playerName) {
     // this is the autojoin message, either join existing board or create new one
-    const message = { playerName }
+    const message = { playerName, players: this.players, rows: this.rows, cols: this.cols, connectCount: this.connectCount}
     this.sendMessage('joinBoard', message)
   }
 
