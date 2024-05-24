@@ -1,8 +1,13 @@
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8); // x=r, y=first 2 bits of r | bit 4
+    console.log(`c ${c} r ${r} v ${v} vs ${v.toString(16)}`)
     return v.toString(16);
 })
+}
+
+for(let r=0; r<16; r++){
+    console.log(`r ${r} v ${r & 0x3 | 0x8}`)
 }
 
 const c1={id:1, app: 'connectx', boardId: uuidv4()}

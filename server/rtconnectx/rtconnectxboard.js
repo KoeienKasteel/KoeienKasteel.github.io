@@ -3,14 +3,17 @@ import rtlog from '../rtlog.js'
 // connectxboard represents a board with various players
 
 class connectxboard {
-    constructor(boardId, maxPlayerCount) {
+    constructor(boardId, maxPlayerCount,rows,cols,connectCount) {
         this._boardId = boardId
         this._maxPlayerCount = maxPlayerCount
-        // should not be necessary because it should be randomized at start of game
+        this._currentplayer = 1 // should not be necessary because it should be randomized at start of game
         // ideally we should increment the startplayer from one game to another because starting means winning for classic connect4
         // how to do this? have client sent it's previous start position/status when calling joinboard?
-        this._currentplayer = 1
+        this._rows=rows
+        this._cols=cols
+        this._connectCount=connectCount
         this.players = []
+        console.log(`connectxboard ${JSON.stringify(this)}`)
     }
 
     log(message,send=true){
@@ -42,6 +45,36 @@ class connectxboard {
 
     get playerCount(){
         return this.players.length
+    }
+
+    get rows()
+    {
+        return this._rows
+    }
+
+    set rows(value)
+    {
+        this._rows=value
+    }
+
+    get cols()
+    {
+        return this._cols
+    }
+
+    set cols(value)
+    {
+        this._cols=value
+    }
+
+    get connectCount()
+    {
+        return this._connectCount
+    }
+
+    set connectCount(value)
+    {
+        this._connectCount=value
     }
 
     nextPlayer()

@@ -6,10 +6,11 @@ import rtlog from '../rtlog.js'
 
 class connectxplayer
 {
-    constructor(ws,boardId,playerId) {
+    constructor(ws,boardId,playerId,name) {
         this._ws = ws
         this._boardId=boardId
         this._playerId=playerId
+        this._name=name
     };
 
     get ws()
@@ -25,6 +26,11 @@ class connectxplayer
     get playerId()
     {
         return this._playerId
+    }
+
+    get name()
+    {
+        return this._name
     }
 
     log(message,send=true){

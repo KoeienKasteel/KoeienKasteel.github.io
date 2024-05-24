@@ -21,6 +21,8 @@ class connectXSocket extends rtSocket {
         document.addEventListener(key + '-joinBoardById', e => this.joinBoardById(e)) // join a specific board. This message should include boardId, server will return the playerId
         document.addEventListener(key + '-moveMade', e => this.moveMade(e)) // indicates the player has made a move, should only be sent by current player
         document.addEventListener(key + '-makeMove', e => this.makeMove(e)) // indicates the server should send the next makeMove call
+        document.addEventListener(key + '-boardList', e => this.makeBoardList(e)) // indicates the server should send a list of boards waiting for players
+        document.addEventListener(key + '-quitBoard', e => this.quitBoard(e)) // indicates the user has quit the board, either by closing the window or joining another board
     }
 
     isSocketOpen() {
@@ -43,17 +45,27 @@ class connectXSocket extends rtSocket {
     joinBoardById(e) {
         const data = JSON.parse(e.detail)
         // used by boardlist UI element to indicate we want to join a particular board
-        this.ws.send(JSON.stringify({ 'action': 'joinBoardyId', boardId: data.boardId, playerName: data.playerName }));
+        this.ws.send(JSON.stringify(Object.assign({ 'action': 'joinBoardyId'}, data)))
     }
 
     moveMade(e) {
         const data = JSON.parse(e.detail)
-        this.ws.send(JSON.stringify({ 'action': 'moveMade', boardId: data.boardId, player: data.player, row: data.row, col: data.col }));
+        this.ws.send(JSON.stringify(Object.assign({'action': 'moveMade'}, data)))
     }
 
     makeMove(e) {
         const data = JSON.parse(e.detail)
-        this.ws.send(JSON.stringify({ 'action': 'makeMove', boardId: data.boardId, winner: data.winner, isDraw: data.isDraw }));
+        this.ws.send(JSON.stringify(Object.assign({'action': 'makeMove'}, data)))
+    }
+
+    makeBoardList(e){
+        const data = JSON.parse(e.detail)
+        this.ws.send(JSON.stringify(Object.assign({'action': 'boardList'}, data)))
+    }
+
+    quitBoard(e) {
+        const data = JSON.parse(e.detail)
+        this.ws.send(JSON.stringify(Object.assign({'action': 'quitBoard'}, data)))
     }
 
     receiveMessage(e) {
