@@ -1,6 +1,7 @@
 import rtconnectxboard from './rtconnectxboard.js'
 import rtconnectxplayer from './rtconnectxplayer.js'
-import uuidv4 from '../rtuuid.js'
+// at this point uuid is not used since we just use in memory sequence numbers
+// import uuidv4 from '../rtuuid.js'
 import rtlog from '../rtlog.js'
 
 // connectxapp holds reference to all connectx boards for the node app running
@@ -8,62 +9,64 @@ import rtlog from '../rtlog.js'
 class connectxapp {
     constructor(wss) {
         this._wss = wss
-        this._ws = undefined
         this.connectxboards = []
+        this.boardId=1
     }
 
     get wss() {
         return this._wss
     }
 
-    log(message, ws = undefined, send = true) {
+    log(message, ws, send = true) {
         rtlog.logdo(message, ws, send)
     }
 
     // get an array of boards waiting matching the playercount/rows/cols/connectCount
     getMatchingBoardsWaiting(ws, players, rows, cols, connectCount) {
         // get boards with room available for more players and a matching player/rows/cols/connect count
-        const filteredarray = this.connectxboards.filter(board => board.playerCount < board.maxPlayerCount && board.maxPlayerCount===players && board.rows === rows && board.cols === cols && board.connectCount === connectCount)
+        const filteredarray = this.connectxboards.filter(board => board.playerCount < board.maxPlayerCount && board.maxPlayerCount===players && board.rows === rows && board.cols === cols && board.connectCount === connectCount && !board.deadBoard)
         return filteredarray
     }
 
-    getSingleBoard(ws, players, rows, cols, connectCount) {
+    getSingleBoard(ws,players, rows, cols, connectCount) {
         const boardsWaiting = this.getMatchingBoardsWaiting(ws, players, rows, cols, connectCount)
-        return boardsWaiting.length === 1 ? boardsWaiting[0] : undefined
+        return boardsWaiting.length > 0 ? boardsWaiting[0] : undefined
     }
 
-    addPlayer(ws, connectxboard, playerName) {
-        const playerId = connectxboard.getNextPlayerId()
+    addPlayer(ws,connectxboard, userName, playerId) {
+        // const playerId = connectxboard.getNextPlayerId()
+        this.log('addPlayer ' + playerId,ws)
         if (playerId > 0) {
-            const connectxplayer = new rtconnectxplayer(ws, connectxboard.boardId, playerId, playerName)
+            const connectxplayer = new rtconnectxplayer(ws, connectxboard.boardId, playerId, userName)
             connectxboard.addPlayer(connectxplayer)
+            this.log('addPlayer finished',ws)
             return connectxplayer
         }
-        else {  // this happens when we're refused a new player number, this can happen if another client has already joined. Rinse and repeat?
+        else {  // this happens when we're refused a new player number, this can happen if another client has already joined.
+            this.log('addPlayer - Not gonna happen',ws)
             return undefined
         }
     }
 
-    getBoardById(ws, boardId) {
+    getBoardById(ws,boardId) {
         const cxboardbyid = this.connectxboards.filter(board => board.boardId === boardId)
         return cxboardbyid.length === 1 ? cxboardbyid[0] : undefined
     }
 
-    joinBoardById(ws, boardId, playerName) {
-        const connectxboard = this.getBoardById(ws, boardId)
+    joinBoardById(ws,boardId, userName, playerId) {
+        const connectxboard = this.getBoardById(ws,boardId)
         let connectxplayer=undefined
         if(connectxboard!==undefined){ // if board exists
-            connectxplayer=this.addPlayer(ws, connectxboard, playerName)
+            connectxplayer=this.addPlayer(ws,connectxboard, userName, playerId)
             if(connectxplayer!==undefined){ // if player could be added to board
-                this.log(`connectxplayerid = ${connectxplayer.playerId}`)
                 this.sendBoardStatus(ws, connectxboard, connectxplayer)
             }
             else{
-                this.log("addPlayer returned undefined")
+                this.log('addPlayer returned undefined',ws)
             }
         }
         else{
-            this.log("getBoardById returned undefined")
+            this.log('getBoardById returned undefined',ws)
         }
 
         return connectxplayer
@@ -72,45 +75,51 @@ class connectxapp {
     createBoard(ws,players,rows,cols,connectCount)
     {
         // const boardId = uuidv4() // maybe use a common sequence number instead of a uuid?
-        let boardId
-        if(this.connectxboards.length>0){
-            boardId=(Math.max(...this.connectxboards.map(board => parseInt(board.boardId)))+1).toString() // better than length of array, also allows for removing boards
-        }
-        else{
-            boardId='1' // this may be a re-issue if all previous boards have been removed... (problem?)
-        }
-        this.log(`boardId: ${boardId}`)
-        this.log(`create board players: ${players}`,ws)
-        const connectxboard = new rtconnectxboard(boardId, players, rows, cols, connectCount)
+        
+        this.boardId++
+        this.log('boardId: ' + this.boardId,ws)
+        this.log('create board for '  + players + ' players',ws)
+        const connectxboard = new rtconnectxboard(ws, this.boardId.toString(), players, rows, cols, connectCount)
         this.connectxboards.push(connectxboard)
         return connectxboard
     }
 
-    createJoinBoard(ws, players, rows, cols,connectCount, playerName) {
-        // remark: this function should only be called when either zero boards or one board is waiting, otherwise the player should pick one from a list
-        // const maxplayercount=2 // for the moment being
+    deleteBoard(ws, cxboard)
+    {
+        let boardIndex=-1
+        this.connectxboards.forEach((board,index) => board.Id===cxboard.Id && boardIndex===-1 ? boardIndex=index : -1)
+        // we will now splice the array to remove the element
+        if(boardIndex>=0){
+            this.log('Remove element ' + boardIndex + ' with boardId ' + cxboard.boardId + ' from connectxboards',ws)
+            this.connectxboards.splice(boardIndex,1)
+        }
+    }
+
+    createJoinBoard(ws, players, rows, cols,connectCount, userName, playerId) {
         let connectxboard = this.getSingleBoard(ws, players, rows, cols, connectCount)
         if (connectxboard === undefined) { // no board waiting for player(s)
             connectxboard=this.createBoard(ws,players,rows,cols,connectCount)
         }
-        const connectxplayer = this.addPlayer(ws, connectxboard,playerName)
+        const connectxplayer = this.addPlayer(ws,connectxboard, userName, playerId)
+        this.log('board '+ connectxboard.boardId + ' now has ' + connectxboard.playerCount + ' players' ,ws)
 
         return { connectxboard, connectxplayer }
     }
 
-    sendBoardStatus(ws,cxboard,connectxplayer)
+    sendBoardStatus(ws, cxboard,connectxplayer)
     {
-        if (cxboard.isComplete()) {
+        if (cxboard.isComplete) {
             // is app required here? sockets are tied to app already
             const data = { app: 'connectx', action: 'joinBoard', boardId: cxboard.boardId, playerId: connectxplayer.playerId }
-            this.log(`Board ${cxboard.boardId} is complete, now broadcasting joinBoard data '${JSON.stringify(data)}'`, ws)
+            this.log('Board '+ cxboard.boardId + ' is complete, now broadcasting joinBoard data ' + JSON.stringify(data),ws)
             cxboard.boardBroadcast(data) //, playerId: connectxplayer.playerId
             cxboard.randomCurrentPlayer() // we will now randomly pick a player to start (cause we have no way of knowing who previously started)
-            cxboard.boardBroadcast({ app: 'connectx', action: 'makeMove', player: cxboard.currentPlayer, boardId: cxboard.boardId })
+            this.log('cxboard.currentPlayerId=' + cxboard.currentPlayerId,ws)
+            cxboard.boardBroadcast({ app: 'connectx', action: 'makeMove', playerId: cxboard.currentPlayerId, boardId: cxboard.boardId, playerIndex: cxboard.currentPlayer })
         }
         else {
             // use broadcast to update status of each and any client waiting
-            this.log(`Board ${cxboard.boardId} is waiting for more players, now broadcasting waitBoard message`, ws)
+            this.log('Board ' + cxboard.boardId + ' is waiting for more players, now broadcasting waitBoard message',ws)
             cxboard.boardBroadcast({ app: 'connectx', action: 'waitBoard', boardId: cxboard.boardId, players: cxboard.maxPlayerCount, playersNeeded: cxboard.maxPlayerCount - cxboard.playerCount })
             // ws.send(JSON.stringify({ app: 'connectx', action: 'waitBoard', boardId: cxboard.boardId, playersNeeded: cxboard.maxPlayerCount-cxboard.playerCount}))
         }
@@ -119,49 +128,59 @@ class connectxapp {
 
     sendBoardsWaiting(ws)
     {
-       const filteredarray = this.connectxboards.filter(board => board.playerCount < board.maxPlayerCount)
+       // console.log(this.connectxboards,ws)
+       // dead boards are boards lingering after a player has left the game. We may somehow revive them in the future
+       const filteredarray = this.connectxboards.filter(board => board.playerCount < board.maxPlayerCount && !board.deadBoard)
        const boards = filteredarray.map(board => {return {boardId: board.boardId, 
                                                           rows: board.rows,
                                                           cols: board.cols,
                                                           maxPlayerCount: board.maxPlayerCount,
                                                           connectCount: board.connectCount,
-                                                          players: board.players.map(player => { return { playerId: player.playerId, name: player.name}})                                                        
+                                                          players: board.players.map(player => { return { playerId: player.playerId, name: player.name}})
                                                         }});
-       this.log(JSON.stringify({action: 'boardList', boards}))
+       // this.log(JSON.stringify({action: 'boardList', boards}))
        ws.send(JSON.stringify({action: 'boardList', boards}))
     }
 
-    joinBoard(ws, players,rows,cols,connectCount, playerName) {
-        if (this.getMatchingBoardsWaiting(ws,players).length <= 1) { // autojoin/create if one or zero boards match parameters
-            const res=this.createJoinBoard(ws, players,rows,cols,connectCount, playerName)
-            this.sendBoardStatus(ws, res.connectxboard, res.connectxplayer)
-        }
-        else {
-            // ws.send({ action: 'createBoardBrowser' })
-            // respond with boardlist
-            if(this.getMatchingBoardsWaiting(ws,players,rows,cols,connectCount).length===0){ // when no board matching parameter(s)
-                const connectxboard=this.createBoard(ws,players,rows,cols,connectCount)
-                this.addPlayer(ws, connectxboard, playerName)
-            }
-            this.sendBoardsWaiting(ws)
-        }
+    joinBoard(ws, players,rows,cols,connectCount, userName, playerId) {
+        const res=this.createJoinBoard(ws, players,rows,cols,connectCount, userName, playerId)
+        this.sendBoardStatus(ws,res.connectxboard, res.connectxplayer)
     }
     
-    quitBoard(ws,boardId,player)
+    quitBoard(ws, boardId,playerId)
     {
         // TBD: determine if boardIds belonging to previous instances can be submitted on current instance
         // if this is true it could be prevented by using a UUID instead of the sequence number 
-        const cxboard = this.getBoardById(ws, boardId)
+        const cxboard = this.getBoardById(ws,boardId)
         if(cxboard!==undefined){
-            cxboard.deadBoard=true
-            // flag the player as a zombie now?
-            cxboard.boardBroadcast({ app: 'connectx', action: 'quitBoard', player, boardId }) // where player is the culprit
+            this.log('in quitBoard for board '+ boardId,ws)
+            const wasComplete=cxboard.isComplete
+            const playerIndex = cxboard.getPlayerIndex(playerId)
+            cxboard.removePlayer(playerId)
+            if(wasComplete){ // board with an active game
+                this.log('player has quit an active game',ws)
+                cxboard.deadBoard=true // removed a player from an active board, for the moment flag the board as a zombie
+                this.log('quitBoard playerIndex=' + playerIndex)
+                cxboard.boardBroadcast({ app: 'connectx', action: 'quitBoard', playerId, boardId, playerIndex }) // where player is the culprit
+            }
+            else if(cxboard.playerCount===0){
+                this.log('last player waiting has quit',ws)
+                // no more players, so clean up the empty board
+                this.deleteBoard(ws,cxboard)
+            }
+            else{
+                this.log('player has quit while waiting for more players',ws)
+                // TBD: we will now resend the waitboard message with the update 'joined' count
+            }
+            cxboard.removePlayer(playerId)
         }
-        // else board does not exist
+        else{
+            this.log('got quitBoard for unknown board ' + boardId,ws)
+        }
     }
 
     onMessage(ws, data) {
-        this.log(`Client has sent us: ${data}`)
+        this.log(`Client has sent rtconnectxapp: ${data}`)
         const msg = JSON.parse(data);
         let cxboard
 
@@ -169,17 +188,17 @@ class connectxapp {
             case 'broadcastMessage': // for test purposes only
                 this.log('got action broadcastMessage')
                 const rtbc = new rtbroadcast(this.wss)
-                rtbc.broadcast(data, this.ws.app, msg.boardId)
+                rtbc.broadcast(ws,data, this.ws.app, msg.boardId)
                 break
             case 'joinBoard':
-                this.log('got action joinBoard', ws)
+                this.log('got action joinBoard')
                 this.log(`joinBoard ${JSON.stringify(msg)}`)
-                this.joinBoard(ws,msg.players,msg.rows,msg.cols,msg.connectCount, msg.playerName) // playerName to be used for auto join/create
+                this.joinBoard(ws, msg.players, msg.rows, msg.cols, msg.connectCount, msg.userName, msg.playerId) // userName to be used for auto join/create
                 break
             case 'joinBoardById':
                 // this message is used by the lobby browser after a board has been selected
                 // the client should set players/rows/cols/connectCount according to parameters of the selected board
-                const cxplayer=this.joinBoardById(ws, msg.boardId, msg.name)
+                const cxplayer=this.joinBoardById(ws, msg.boardId, msg.userName, msg.playerId)
                 if(cxplayer!==undefined){
                     cxboard = this.getBoardById(ws, msg.boardId)
                     this.sendBoardStatus(ws,cxboard,cxplayer)    
@@ -193,6 +212,7 @@ class connectxapp {
                 cxboard.boardBroadcast(msg)
                 break
             case 'boardList': // client requests a boardlist in order to show the board/lobby browser
+              this.log('action boardList')
               this.sendBoardsWaiting(ws) // send a list of boards with room available for more players
               break
             case 'makeMove':
@@ -200,18 +220,20 @@ class connectxapp {
                 cxboard = this.getBoardById(ws, msg.boardId)
                 if (msg.winner === 0 && !msg.isDraw) {
                     cxboard.nextPlayer()
-                    cxboard.boardBroadcast({ app: 'connectx', action: 'makeMove', player: cxboard.currentPlayer, boardId: cxboard.boardId })
+                    // const playerIndex=cxboard.getPlayerIndex(cxboard.currentPlayerId)
+                    cxboard.boardBroadcast({ app: 'connectx', action: 'makeMove', playerId: cxboard.currentPlayerId, boardId: cxboard.boardId, playerIndex: cxboard.currentPlayer})
                 }
                 // else game over, cleanup/trash the board or something?
                 break
             case 'quitBoard': // when client disconnecting? When/where to send?
-              this.quitBoard(ws,msg.boardId,msg.player)
+              this.log('received quitboard for board ' + msg.boardId + ', playerId ' + msg.playerId,ws)
+              this.quitBoard(ws,msg.boardId,msg.playerId)
               break
             default:
                 if (msg.action !== undefined)
-                    this.log(`Received message with unknown action ${msg.action}`)
+                    this.log('Received message with unknown action ' + msg.action,ws)
                 else
-                    this.log(`Received message without action`)
+                    this.log('Received message without action',ws)
         }
     }
 }

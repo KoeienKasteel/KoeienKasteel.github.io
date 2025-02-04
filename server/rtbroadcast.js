@@ -9,7 +9,7 @@ class rtbroadcast{
 
     broadcast(message,boardId=undefined,app=undefined) {
       if(app!==undefined || boardId===undefined){
-        rtlog.logdo(`Sending broadcast message '${message}' to app ${app} boardId ${boardId}`)
+        rtlog.logdo(`Sending broadcast message '${JSON.stringify(message)}' to app ${app} boardId ${boardId}`)
         this.wss.clients.forEach(client => (app===undefined || client.app===app) && (boardId===undefined || client.boardID===message.boardID) && client.send(JSON.stringify(message)))
       }
       else{

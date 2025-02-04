@@ -1,19 +1,15 @@
 import rtlog from '../rtlog.js'
-// import rtbroadcast from '../rtbroadcast.js'
-
-// import rtdbhandler from './rtdbhandler.js'
-// import uuidv4 from '../rtuuid.js'
 
 class connectxplayer
 {
-    constructor(ws,boardId,playerId,name) {
-        this._ws = ws
+    constructor(ws, boardId,playerId,name) {
+        this._ws=ws
         this._boardId=boardId
         this._playerId=playerId
         this._name=name
-    };
+    }
 
-    get ws()
+    get ws ()
     {
         return this._ws
     }
@@ -33,27 +29,23 @@ class connectxplayer
         return this._name
     }
 
-    log(message,send=true){
-        rtlog.logdo(message,this.ws,send)
+    log(message,ws,send=true){
+        rtlog.logdo(message,ws,send)
     }
 
-    // doquery(){
-    //     const rtdb = new rtdbhandler()
-    //     rtdb.doquery()
-    // }
-
-    sendObject(data)
+    sendObject(data, withPlayerId=false)
     {
-        // data.playerId=this.playerId
-        const message=JSON.stringify(Object.assign(data, { playerId: this.playerId}))
-        this.log(`connectxplayer.sendMessage ${message}`)
+        let message
+        if (withPlayerId) {
+            data.playerId = this.playerId
+            message = JSON.stringify(Object.assign(data, { playerId: this.playerId }))
+        }
+        else {
+            message = JSON.stringify(data)
+        }
+        this.log('connectxplayer.sendMessage ' + message)
         this.ws.send(message)
     }
-
-    // static sayhello()
-    // {
-    //    return "Hello, World!"
-    // }
 }
 
 // export default { rtconnectx, etcetera } // for multiple default exports

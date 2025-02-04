@@ -1,5 +1,7 @@
 import rtchatapp from './rtchat/index.js'
 import connectxapp from './rtconnectx/rtconnectxapp.js'
+import sessionhandler from './rtsessionhandler.js'
+import bcrypt from 'bcrypt'
 import rtlog from './rtlog.js'
 import { WebSocketServer } from 'ws';
 
@@ -18,13 +20,24 @@ wss.on("connection", (ws, req) => {
   var path = req.url.split('/');
   if (path[1] === 'app') // zero is empty because path starts with a /
   {
+    if(wss.sessionhandler===undefined){
+      log(`creating new sessionhandler object for server.`) // ${JSON.stringify(wss)}`)
+      wss.sessionhandler=new sessionhandler(wss)  
+    }
+
     ws.app = path[2]
     switch(ws.app)
     {
       case 'connectx':
         if(wss.cxapp===undefined){
-          log(`creating new connectx application object for server ${JSON.stringify(wss)}`)
-          wss.cxapp=new connectxapp(wss)  
+          log(`creating new connectx application object for server.`) // ${JSON.stringify(wss)}`)
+          wss.cxapp=new connectxapp(wss,ws)  
+        }
+        break;
+      case 'session':
+        if(wss.session===undefined){
+          log(`creating new connectx application object for server.`) // ${JSON.stringify(wss)}`)
+          wss.sesionhandler=new sessionhandler(wss)
         }
         break;
       default:
@@ -36,16 +49,20 @@ wss.on("connection", (ws, req) => {
     console.log(`onmessage`)
     log(`Client has sent us: ${data}`)
     // const msg = JSON.parse(data);
-    log(`got message for '${ws.app}' app`)
+    log(`got message for '${ws.app}'`)
     switch (ws.app) {
       case 'chat':
         const chat = new rtchatapp(wss, ws)
         chat.onMessage(data)
         break;
       case 'connectx':
-        log('message for connectx')
+        log(`message for connectx`)
         wss.cxapp.onMessage(ws,data)
         break;
+      case 'session':
+        log(`message for sessionHandler`)
+        wss.sessionhandler.onMessage(ws,data)
+        break
       default:
         log(`Not processing message for unknown app '${app}'.`);
     }

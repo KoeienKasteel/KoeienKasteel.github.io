@@ -3,10 +3,11 @@ import rtlog from '../rtlog.js'
 // connectxboard represents a board with various players
 
 class connectxboard {
-    constructor(boardId, maxPlayerCount,rows,cols,connectCount) {
+    constructor(ws,boardId, maxPlayerCount,rows,cols,connectCount) {
         this._boardId = boardId
         this._maxPlayerCount = maxPlayerCount
-        this._currentplayer = 1 // should not be necessary because it should be randomized at start of game
+        this._isComplete = false
+        this.currentPlayer = 0 // should not be necessary because it should be randomized at start of game
         // ideally we should increment the startplayer from one game to another because starting means winning for classic connect4
         // how to do this? have client sent it's previous start position/status when calling joinboard?
         this._rows=rows
@@ -14,25 +15,33 @@ class connectxboard {
         this._connectCount=connectCount
         this.players = []
         console.log(`connectxboard ${JSON.stringify(this)}`)
+        this._ws=ws
     }
 
-    log(message,send=true){
-        rtlog.logdo(message,undefined,send)
+    log(message,ws=undefined,send=true){
+        rtlog.logdo(message,ws,send)
     }
 
     get currentPlayer()
     {
-        return this._currentplayer
+        return this._currentPlayer
     }
 
     set currentPlayer(value)
     {
-        this._currentplayer=value
+        this.log('set currentPlayer to ' + value,this._ws)
+        this._currentPlayer=value
     }
 
-    boardBroadcast(data)
+    get currentPlayerId()
     {
-        this.players.forEach(player => player.sendObject(data))
+       this.log('currentPlayerId() returns ' + this.players[this.currentPlayer].playerId + ' for ' + this.currentPlayer,this._ws)
+       return this.players[this.currentPlayer].playerId
+    }
+
+    boardBroadcast(data, withPlayerId=false)
+    {
+        this.players.forEach(player => player.sendObject(data,withPlayerId))
     }
 
     get boardId(){
@@ -77,43 +86,62 @@ class connectxboard {
         this._connectCount=value
     }
 
-    nextPlayer()
+    get isComplete()
     {
-        this._currentplayer++
-        if(this._currentplayer>maxPlayerCount)
-          this._currentplayer=1
+        return this._isComplete
+    }
+
+    nextPlayer() {
+        this.log('nextPlayer for playerId ' + this.currentPlayerId + ' with index ' + this.currentPlayer,this._ws)
+        let playerIndex = -1
+        this.players.forEach((player, index) => playerIndex = player.playerId === this.currentPlayerId ? index : playerIndex)
+        if (playerIndex >= 0) {
+            playerIndex++
+            if (playerIndex >= this.players.length) {
+                playerIndex = 0
+            }
+            this.currentPlayer=playerIndex
+        }
+        else{
+            this.log('nextPlayer failed with -1',this._ws)
+        }
     }
 
     randomCurrentPlayer()
     {
-        this._currentplayer = Math.floor(Math.random()*this.maxPlayerCount)+1
+        this.log('randomCurrentPlayer',this._ws)
+        const index = Math.floor(Math.random()*this.maxPlayerCount)
+        this.currentPlayer = index
+        this.log('randomCurrentPlayer now ' + this.currentPlayer,this._ws)
     }
     
-    getNextPlayerId(){
-        if(this.players.length===this.maxPlayerCount){ 
-          return 0
-        }
-        else{
-          return this.players.length+1
-        }
-    }
-
     addPlayer(connectxplayer)
     {
+        this.log('addPlayer ' + connectxplayer.playerId,this._ws)
         this.players.push(connectxplayer)
-    }
-
-    isComplete()
-    {
-        return this.players.length===this.maxPlayerCount
-    }
-
-    nextPlayer() {
-        this.currentPlayer++
-        if (this.currentPlayer > this.maxPlayerCount) {
-          this.currentPlayer = 1
+        if(this.players.length===this.maxPlayerCount){
+            this._isComplete=true
         }
-      }    
+    }
+
+    removePlayer(playerId)
+    {
+        // this removes a player from the board.
+        this.log('players: ' + this.players,this._ws)
+        this.log('RemovePlayer ' + playerId + ' count in = ' + this.players.length, this._ws)
+        this.players=this.players.filter(player => player.playerId!==playerId,this._ws)
+        this.log('RemovePlayer count out = ' + this.players.length,this._ws)
+    }
+
+    getPlayerIndex(playerId) {
+        let playerIndex = -1
+        this.log('getPlayerIndex for ' + playerId,this._ws)
+        this.players.forEach((player, index) => {
+            playerIndex = player.playerId === playerId ? index : playerIndex
+            this.log('player.playerId=' + player.playerId + ' playerId=' + playerId + ' playerIndex is now '+ playerIndex,this._ws)
+        })
+        return playerIndex !== -1 ? playerIndex : undefined
+    }
 }
 
 export default connectxboard
