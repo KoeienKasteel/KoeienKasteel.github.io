@@ -29,13 +29,11 @@ class connectxboard {
 
     set currentPlayer(value)
     {
-        this.log('set currentPlayer to ' + value,this._ws)
         this._currentPlayer=value
     }
 
     get currentPlayerId()
     {
-       this.log('currentPlayerId() returns ' + this.players[this.currentPlayer].playerId + ' for ' + this.currentPlayer,this._ws)
        return this.players[this.currentPlayer].playerId
     }
 
@@ -117,7 +115,6 @@ class connectxboard {
     
     addPlayer(connectxplayer)
     {
-        this.log('addPlayer ' + connectxplayer.playerId,this._ws)
         this.players.push(connectxplayer)
         if(this.players.length===this.maxPlayerCount){
             this._isComplete=true

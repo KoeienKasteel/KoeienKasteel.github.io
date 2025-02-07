@@ -1,7 +1,6 @@
 import rtchatapp from './rtchat/index.js'
 import connectxapp from './rtconnectx/rtconnectxapp.js'
 import sessionhandler from './rtsessionhandler.js'
-import bcrypt from 'bcrypt'
 import rtlog from './rtlog.js'
 import { WebSocketServer } from 'ws';
 
@@ -17,7 +16,7 @@ wss.on("connection", (ws, req) => {
   log("new client connected")
   log(`url=${req.url}`)
 
-  var path = req.url.split('/');
+  var path = req.url.split('/')
   if (path[1] === 'app') // zero is empty because path starts with a /
   {
     if(wss.sessionhandler===undefined){
@@ -33,53 +32,56 @@ wss.on("connection", (ws, req) => {
           log(`creating new connectx application object for server.`) // ${JSON.stringify(wss)}`)
           wss.cxapp=new connectxapp(wss,ws)  
         }
-        break;
+        break
       case 'session':
         if(wss.session===undefined){
           log(`creating new connectx application object for server.`) // ${JSON.stringify(wss)}`)
           wss.sesionhandler=new sessionhandler(wss)
         }
-        break;
+        break
       default:
     }
   }
 
   //on message from client
   ws.on("message", data => {
-    console.log(`onmessage`)
-    log(`Client has sent us: ${data}`)
-    // const msg = JSON.parse(data);
-    log(`got message for '${ws.app}'`)
+    log('onmessage')
+    const msg = JSON.parse(data)
+    if(msg.password){
+      msg.password='******'
+    }
+    log('Client has sent us: ' + JSON.stringify(msg))
+    log('got message for ' + ws.app)
     switch (ws.app) {
       case 'chat':
         const chat = new rtchatapp(wss, ws)
         chat.onMessage(data)
-        break;
+        break
       case 'connectx':
         log(`message for connectx`)
         wss.cxapp.onMessage(ws,data)
-        break;
+        break
       case 'session':
         log(`message for sessionHandler`)
         wss.sessionhandler.onMessage(ws,data)
         break
       default:
-        log(`Not processing message for unknown app '${app}'.`);
+        log('Not processing message for unknown app ' + app + '.')
     }
   })
 
   // handling what to do when clients disconnects from server
-  ws.on("close", () => {
-    log("the client has disconnected")
+  ws.on('close', () => {
+    log('the client has disconnected')
     //todo remove user from data
     //todo send user quited to others on the same board
-  });
+  })
 
   // handling client connection error
   ws.onerror = function () {
-    log("Some Error occurred")
+    log('An Error occurred')
   }
 })
 
-// ToDo: indicate a connection on port 443 when running on plesk
-rtlog.logdo(`The WebSocket server is running on port ${port}`);
+// ToDo: report a connection on port 443 when running on plesk
+rtlog.logdo('The WebSocket server is running on port ' + port)

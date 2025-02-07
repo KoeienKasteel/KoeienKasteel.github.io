@@ -1,20 +1,22 @@
 import mysql from 'mysql';
 import rtlog from './rtlog.js'
+import dbconnection from './rtdbconnection.js'
 
 class dbhandler {
     constructor(ws) {
         this.ws=ws
         this.pool = mysql.createPool({
-            connectionLimit: 10,
-            host: 'localhost',
-            database: 'rtconnectx',
-            user: 'rtconnectx',
-            password: '0%qt5uB98',
+            connectionLimit: dbconnection.connectionLimit,
+            host: dbconnection.host,
+            database: dbconnection.database,
+            user: dbconnection.user,
+            password: dbconnection.password,
         });
         this.queries = {
-            createUser: 'INSERT INTO users (userName, password) VALUES (?,?)', // Id is auto increment?
-            getUserByName : 'SELECT * FROM users where userName = ? ',
-            getUser: 'SELECT * FROM users where id = ? ',
+            createUser: 'INSERT INTO users (userName, password) VALUES (?,?)', // Id is auto increment, password is password hash
+            getUserByName : 'SELECT * FROM users where userName = ?',
+            getUser: 'SELECT * FROM users where id = ?',
+            updateUserPassword: 'UPDATE users SET password = ? where Id = ?',
             deleteUser: 'DELETE FROM users WHERE id = ?',
         }
     }

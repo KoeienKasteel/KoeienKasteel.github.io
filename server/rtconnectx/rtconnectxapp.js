@@ -1,7 +1,5 @@
 import rtconnectxboard from './rtconnectxboard.js'
 import rtconnectxplayer from './rtconnectxplayer.js'
-// at this point uuid is not used since we just use in memory sequence numbers
-// import uuidv4 from '../rtuuid.js'
 import rtlog from '../rtlog.js'
 
 // connectxapp holds reference to all connectx boards for the node app running
@@ -33,19 +31,11 @@ class connectxapp {
         return boardsWaiting.length > 0 ? boardsWaiting[0] : undefined
     }
 
-    addPlayer(ws,connectxboard, userName, playerId) {
-        // const playerId = connectxboard.getNextPlayerId()
-        this.log('addPlayer ' + playerId,ws)
-        if (playerId > 0) {
-            const connectxplayer = new rtconnectxplayer(ws, connectxboard.boardId, playerId, userName)
-            connectxboard.addPlayer(connectxplayer)
-            this.log('addPlayer finished',ws)
-            return connectxplayer
-        }
-        else {  // this happens when we're refused a new player number, this can happen if another client has already joined.
-            this.log('addPlayer - Not gonna happen',ws)
-            return undefined
-        }
+    addPlayer(ws, connectxboard, userName, playerId) {
+        const connectxplayer = new rtconnectxplayer(ws, connectxboard.boardId, playerId, userName)
+        connectxboard.addPlayer(connectxplayer)
+        this.log('addPlayer finished', ws)
+        return connectxplayer
     }
 
     getBoardById(ws,boardId) {
@@ -180,7 +170,7 @@ class connectxapp {
     }
 
     onMessage(ws, data) {
-        this.log(`Client has sent rtconnectxapp: ${data}`)
+        this.log('Client has sent rtconnectxapp: ' + data)
         const msg = JSON.parse(data);
         let cxboard
 
@@ -192,7 +182,7 @@ class connectxapp {
                 break
             case 'joinBoard':
                 this.log('got action joinBoard')
-                this.log(`joinBoard ${JSON.stringify(msg)}`)
+                this.log('joinBoard ' + JSON.stringify(msg))
                 this.joinBoard(ws, msg.players, msg.rows, msg.cols, msg.connectCount, msg.userName, msg.playerId) // userName to be used for auto join/create
                 break
             case 'joinBoardById':
@@ -210,6 +200,7 @@ class connectxapp {
                 // sent by client after a move has been made, broadcast to all players
                 cxboard = this.getBoardById(ws, msg.boardId)
                 cxboard.boardBroadcast(msg)
+
                 break
             case 'boardList': // client requests a boardlist in order to show the board/lobby browser
               this.log('action boardList')
@@ -220,10 +211,9 @@ class connectxapp {
                 cxboard = this.getBoardById(ws, msg.boardId)
                 if (msg.winner === 0 && !msg.isDraw) {
                     cxboard.nextPlayer()
-                    // const playerIndex=cxboard.getPlayerIndex(cxboard.currentPlayerId)
                     cxboard.boardBroadcast({ app: 'connectx', action: 'makeMove', playerId: cxboard.currentPlayerId, boardId: cxboard.boardId, playerIndex: cxboard.currentPlayer})
                 }
-                // else game over, cleanup/trash the board or something?
+                // else game over, cleanup/remove board or something?
                 break
             case 'quitBoard': // when client disconnecting? When/where to send?
               this.log('received quitboard for board ' + msg.boardId + ', playerId ' + msg.playerId,ws)
